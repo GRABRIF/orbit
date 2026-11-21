@@ -2,6 +2,7 @@
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import sqlite3, json, os, time, secrets, hashlib, re, smtplib, ssl, mimetypes
+import base64, struct, threading
 from email.parser import BytesParser
 from email import policy
 from email.message import EmailMessage
@@ -40,8 +41,10 @@ def init_db():
         CREATE TABLE IF NOT EXISTS messages(id INTEGER PRIMARY KEY AUTOINCREMENT, sender_id INTEGER NOT NULL, recipient_id INTEGER NOT NULL, body TEXT NOT NULL, attachment_json TEXT, created_at INTEGER NOT NULL);
         CREATE TABLE IF NOT EXISTS uploads(filename TEXT PRIMARY KEY, owner_id INTEGER NOT NULL, content_type TEXT NOT NULL, size INTEGER NOT NULL, created_at INTEGER NOT NULL);
         CREATE INDEX IF NOT EXISTS messages_pair ON messages(sender_id,recipient_id,id);
+        CREATE INDEX IF NOT EXISTS messages_recipient ON messages(recipient_id,sender_id,id);
         CREATE TABLE IF NOT EXISTS message_hidden(message_id INTEGER NOT NULL,user_id INTEGER NOT NULL,PRIMARY KEY(message_id,user_id));
         CREATE TABLE IF NOT EXISTS pinned_messages(message_id INTEGER NOT NULL,user_id INTEGER NOT NULL,PRIMARY KEY(message_id,user_id));
+        CREATE TABLE IF NOT EXISTS chat_read(user_id INTEGER NOT NULL, other_id INTEGER NOT NULL, last_read_id INTEGER NOT NULL, PRIMARY KEY(user_id,other_id));
         ''')
     # Upgrade existing Orbit databases without deleting accounts or messages.
     with connect() as c:
@@ -52,6 +55,7 @@ def init_db():
         if 'attachment_json' not in mcols: c.execute('ALTER TABLE messages ADD COLUMN attachment_json TEXT')
         if 'reply_to_id' not in mcols: c.execute('ALTER TABLE messages ADD COLUMN reply_to_id INTEGER')
         c.execute('CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique ON users(email)')
+        c.execute('CREATE INDEX IF NOT EXISTS messages_recipient ON messages(recipient_id,sender_id,id)')
 init_db()
 
 def pw_hash(pw,salt):
@@ -120,6 +124,74 @@ def send_login_code(email, code):
                     pass
     raise RuntimeError('SMTP attempts failed: ' + ' | '.join(errors))
 
+# ---------- WebSocket (stdlib, RFC 6455) ----------
+WS_MAGIC='258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
+ws_clients={}          # user_id -> [socket, ...]
+ws_lock=threading.Lock()
+
+def ws_accept_key(key):
+    return base64.b64encode(hashlib.sha1((key+WS_MAGIC).encode()).digest()).decode()
+
+def ws_send(sock, text):
+    payload=text.encode('utf-8')
+    n=len(payload)
+    if n<126:
+        hdr=bytes([0x81, n])
+    elif n<65536:
+        hdr=bytes([0x81,126])+struct.pack('>H', n)
+    else:
+        hdr=bytes([0x81,127])+struct.pack('>Q', n)
+    sock.sendall(hdr+payload)
+
+def ws_recv_frame(sock):
+    """Return (opcode, payload_bytes) or None on close/error."""
+    try:
+        hdr=sock.recv(2)
+        if len(hdr)<2: return None
+        b1,b2=hdr[0],hdr[1]
+        masked=b2 & 0x80
+        length=b2 & 0x7f
+        if length==126:
+            length=struct.unpack('>H', sock.recv(2))[0]
+        elif length==127:
+            length=struct.unpack('>Q', sock.recv(8))[0]
+        mask=sock.recv(4) if masked else b''
+        # read exactly length bytes (recv may return partial)
+        chunks=[]; got=0
+        while got<length:
+            chunk=sock.recv(length-got)
+            if not chunk: return None
+            chunks.append(chunk); got+=len(chunk)
+        payload=b''.join(chunks)
+        if masked:
+            payload=bytes(b ^ mask[i%4] for i,b in enumerate(payload))
+        return (b1 & 0x0f, payload)
+    except Exception:
+        return None
+
+def push_to_user(user_id, obj):
+    text=json.dumps(obj, ensure_ascii=False)
+    with ws_lock:
+        socks=list(ws_clients.get(user_id, []))
+    dead=[]
+    for s in socks:
+        try:
+            ws_send(s, text)
+        except Exception:
+            dead.append(s)
+    if dead:
+        with ws_lock:
+            lst=ws_clients.get(user_id)
+            if lst:
+                for s in dead:
+                    if s in lst: lst.remove(s)
+                if not lst: ws_clients.pop(user_id, None)
+
+def broadcast_chat_update(user_id, other_id):
+    """Notify a user that their chat list / a conversation changed."""
+    push_to_user(user_id, {'type':'chat_updated','other_id':other_id})
+
+# ---------- Handler ----------
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         print('%s - %s' % (self.address_string(), fmt%args))
@@ -148,12 +220,77 @@ class Handler(BaseHTTPRequestHandler):
             s=c.execute('SELECT user_id FROM sessions WHERE token=? AND expires>?',(token,int(time.time()))).fetchone()
             if not s:return None
             return c.execute('SELECT id,username,email,display_name,avatar,created_at FROM users WHERE id=?',(s['user_id'],)).fetchone()
+
+    def handle_websocket(self, u):
+        key=self.headers.get('Sec-WebSocket-Key')
+        if not key:
+            return self.send_json(400,{'detail':'Нет Sec-WebSocket-Key'})
+        accept=ws_accept_key(key)
+        self.send_response(101)
+        self.send_header('Upgrade','websocket')
+        self.send_header('Connection','Upgrade')
+        self.send_header('Sec-WebSocket-Accept',accept)
+        self.end_headers()
+        sock=self.connection
+        with ws_lock:
+            ws_clients.setdefault(u['id'], []).append(sock)
+        try:
+            ws_send(sock, json.dumps({'type':'hello','user_id':u['id']}, ensure_ascii=False))
+            while True:
+                frame=ws_recv_frame(sock)
+                if frame is None: break
+                opcode, payload=frame
+                if opcode==0x8: break                    # close
+                if opcode==0x9:                          # ping -> pong
+                    try: sock.sendall(bytes([0x8a, len(payload)])+payload)
+                    except Exception: break
+                    continue
+                if opcode!=0x1: continue                 # only text frames
+                try:
+                    msg=json.loads(payload.decode('utf-8','replace'))
+                except Exception:
+                    continue
+                mtype=msg.get('type')
+                if mtype=='typing':
+                    try:
+                        to=int(msg.get('to'))
+                        if to and to!=u['id']:
+                            push_to_user(to, {'type':'typing','from':u['id']})
+                    except (TypeError,ValueError): pass
+                elif mtype=='mark_read':
+                    try:
+                        other=int(msg.get('other_id'))
+                        mid=int(msg.get('message_id'))
+                        with connect() as c:
+                            c.execute('INSERT INTO chat_read(user_id,other_id,last_read_id) VALUES(?,?,?) '
+                                      'ON CONFLICT(user_id,other_id) DO UPDATE SET last_read_id=MAX(last_read_id,?)',
+                                      (u['id'],other,mid,mid))
+                    except (TypeError,ValueError): pass
+        finally:
+            with ws_lock:
+                lst=ws_clients.get(u['id'])
+                if lst:
+                    if sock in lst: lst.remove(sock)
+                    if not lst: ws_clients.pop(u['id'], None)
+
     def do_GET(self):
         p=urlparse(self.path)
         if p.path=='/' or p.path=='/index.html':
             try: data=open(os.path.join(BASE,'static','index.html'),'rb').read()
             except OSError: return self.send_json(500,{'detail':'Файл интерфейса не найден'})
             self.send_response(200); self.send_header('Content-Type','text/html; charset=utf-8'); self.send_header('Content-Length',str(len(data))); self.end_headers(); self.wfile.write(data); return
+        if p.path=='/ws':
+            u=self.user()
+            if not u:
+                # Browsers cannot set Authorization on WebSocket; accept token from query.
+                tok=parse_qs(p.query).get('token',[''])[0].strip()
+                if tok:
+                    with connect() as c:
+                        s=c.execute('SELECT user_id FROM sessions WHERE token=? AND expires>?',(tok,int(time.time()))).fetchone()
+                        if s:
+                            u=c.execute('SELECT id,username,email,display_name,avatar,created_at FROM users WHERE id=?',(s['user_id'],)).fetchone()
+            if not u: return self.send_json(401,{'detail':'Войдите для WebSocket'})
+            return self.handle_websocket(u)
         if p.path.startswith('/uploads/'):
             viewer=self.user()
             if not viewer:return self.send_json(401,{'detail':'Войдите для просмотра файлов'})
@@ -162,7 +299,7 @@ class Handler(BaseHTTPRequestHandler):
                 meta=c.execute('SELECT owner_id,content_type FROM uploads WHERE filename=?',(name,)).fetchone()
                 allowed=bool(meta and meta['owner_id']==viewer['id'])
                 if not allowed and meta:
-                    allowed=bool(c.execute('SELECT 1 FROM messages WHERE attachment_json LIKE ? AND (sender_id=? OR recipient_id=?) LIMIT 1',('%'+name+'%',viewer['id'],viewer['id'])).fetchone())
+                    allowed=bool(c.execute('SELECT 1 FROM messages WHERE (sender_id=? OR recipient_id=?) AND attachment_json LIKE ? LIMIT 1',(viewer['id'],viewer['id'],'%'+name+'%')).fetchone())
                 if not allowed and meta:
                     allowed=bool(c.execute('SELECT 1 FROM users WHERE avatar=?',(('/uploads/'+name),)).fetchone())
             if not meta:return self.send_json(404,{'detail':'Файл не найден'})
@@ -184,11 +321,26 @@ class Handler(BaseHTTPRequestHandler):
             u=self.user()
             if not u:return self.send_json(401,{'detail':'Войдите в аккаунт'})
             with connect() as c:
-                rows=c.execute('''SELECT other.id,other.username,other.display_name,other.avatar,
-                    (SELECT m.body FROM messages m WHERE ((m.sender_id=? AND m.recipient_id=other.id) OR (m.sender_id=other.id AND m.recipient_id=?)) ORDER BY m.id DESC LIMIT 1) AS last_message,
-                    (SELECT m.created_at FROM messages m WHERE ((m.sender_id=? AND m.recipient_id=other.id) OR (m.sender_id=other.id AND m.recipient_id=?)) ORDER BY m.id DESC LIMIT 1) AS last_time
-                    FROM users other WHERE other.id IN (SELECT recipient_id FROM messages WHERE sender_id=? UNION SELECT sender_id FROM messages WHERE recipient_id=?)
-                    ORDER BY last_time DESC''',(u['id'],u['id'],u['id'],u['id'],u['id'],u['id'])).fetchall()
+                # Single pass: latest message id per conversation partner, excluding hidden.
+                rows=c.execute('''
+                    WITH conv AS (
+                      SELECT CASE WHEN m.sender_id=? THEN m.recipient_id ELSE m.sender_id END AS other_id,
+                             MAX(m.id) AS last_id
+                      FROM messages m
+                      WHERE (m.sender_id=? OR m.recipient_id=?)
+                        AND NOT EXISTS(SELECT 1 FROM message_hidden h WHERE h.message_id=m.id AND h.user_id=?)
+                      GROUP BY other_id
+                    )
+                    SELECT u.id,u.username,u.display_name,u.avatar,
+                           m.body AS last_message, m.created_at AS last_time, m.sender_id AS last_sender,
+                           (SELECT COUNT(*) FROM messages mm WHERE mm.sender_id=conv.other_id AND mm.recipient_id=?
+                              AND mm.id > COALESCE((SELECT last_read_id FROM chat_read r WHERE r.user_id=? AND r.other_id=conv.other_id),0)
+                              AND NOT EXISTS(SELECT 1 FROM message_hidden hh WHERE hh.message_id=mm.id AND hh.user_id=?)) AS unread
+                    FROM conv
+                    JOIN users u ON u.id=conv.other_id
+                    LEFT JOIN messages m ON m.id=conv.last_id
+                    ORDER BY last_time DESC
+                ''',(u['id'],u['id'],u['id'],u['id'],u['id'],u['id'],u['id'])).fetchall()
             return self.send_json(200,{'chats':[dict(x) for x in rows]})
         if p.path.startswith('/api/messages/'):
             u=self.user()
@@ -196,14 +348,26 @@ class Handler(BaseHTTPRequestHandler):
             try: other=int(p.path.rsplit('/',1)[-1])
             except ValueError:return self.send_json(400,{'detail':'Неверный ID'})
             with connect() as c:
-                rows=c.execute('''SELECT m.id,m.sender_id,m.recipient_id,m.body,m.attachment_json,m.created_at,m.reply_to_id,
-                    EXISTS(SELECT 1 FROM pinned_messages p WHERE p.message_id=m.id AND p.user_id=?) AS pinned
-                    FROM messages m
-                    WHERE ((m.sender_id=? AND m.recipient_id=?) OR (m.sender_id=? AND m.recipient_id=?))
-                    AND NOT EXISTS(SELECT 1 FROM message_hidden h WHERE h.message_id=m.id AND h.user_id=?)
-                    ORDER BY m.id LIMIT 500''',(u['id'],u['id'],other,other,u['id'],u['id'])).fetchall()
+                rows=c.execute('''
+                    SELECT m.id,m.sender_id,m.recipient_id,m.body,m.attachment_json,m.created_at,m.reply_to_id,
+                      EXISTS(SELECT 1 FROM pinned_messages p WHERE p.message_id=m.id AND p.user_id=?) AS pinned
+                    FROM (
+                      SELECT mm.* FROM messages mm WHERE mm.sender_id=? AND mm.recipient_id=?
+                      UNION
+                      SELECT mm.* FROM messages mm WHERE mm.sender_id=? AND mm.recipient_id=?
+                    ) m
+                    WHERE NOT EXISTS(SELECT 1 FROM message_hidden h WHERE h.message_id=m.id AND h.user_id=?)
+                    ORDER BY m.id LIMIT 500
+                ''',(u['id'],u['id'],other,other,u['id'],u['id'])).fetchall()
+                # Mark as read up to the latest message id.
+                if rows:
+                    last_id=rows[-1]['id']
+                    c.execute('INSERT INTO chat_read(user_id,other_id,last_read_id) VALUES(?,?,?) '
+                              'ON CONFLICT(user_id,other_id) DO UPDATE SET last_read_id=MAX(last_read_id,?)',
+                              (u['id'],other,last_id,last_id))
             return self.send_json(200,{'messages':[dict(x) for x in rows]})
         return self.send_json(404,{'detail':'Не найдено'})
+
     def do_POST(self):
         p=urlparse(self.path)
         if p.path in ('/api/upload','/api/avatar'):
@@ -322,6 +486,9 @@ class Handler(BaseHTTPRequestHandler):
                 elif action=='unpin':
                     c.execute('DELETE FROM pinned_messages WHERE message_id=? AND user_id=?',(mid,u['id']))
                 else:return self.send_json(400,{'detail':'Неизвестное действие'})
+                other=m['recipient_id'] if m['sender_id']==u['id'] else m['sender_id']
+            broadcast_chat_update(u['id'], other)
+            broadcast_chat_update(other, u['id'])
             return self.send_json(200,{'ok':True})
         if p.path=='/api/forward':
             u=self.user()
@@ -333,6 +500,8 @@ class Handler(BaseHTTPRequestHandler):
                 if not m:return self.send_json(404,{'detail':'Сообщение не найдено'})
                 if not c.execute('SELECT id FROM users WHERE id=?',(recipient,)).fetchone():return self.send_json(404,{'detail':'Получатель не найден'})
                 c.execute('INSERT INTO messages(sender_id,recipient_id,body,attachment_json,created_at) VALUES(?,?,?,?,?)',(u['id'],recipient,m['body'],m['attachment_json'],int(time.time())))
+            broadcast_chat_update(u['id'], recipient)
+            broadcast_chat_update(recipient, u['id'])
             return self.send_json(200,{'ok':True})
         if p.path=='/api/messages':
             u=self.user()
@@ -347,6 +516,8 @@ class Handler(BaseHTTPRequestHandler):
             with connect() as c:
                 if not c.execute('SELECT id FROM users WHERE id=?',(recipient,)).fetchone():return self.send_json(404,{'detail':'Пользователь не найден'})
                 c.execute('INSERT INTO messages(sender_id,recipient_id,body,attachment_json,created_at,reply_to_id) VALUES(?,?,?,?,?,?)',(u['id'],recipient,body,json.dumps(attachment,ensure_ascii=False) if attachment else None,int(time.time()),reply_to))
+            broadcast_chat_update(u['id'], recipient)
+            broadcast_chat_update(recipient, u['id'])
             return self.send_json(200,{'ok':True})
         return self.send_json(404,{'detail':'Не найдено'})
 

@@ -2,77 +2,253 @@
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Orbit Messenger</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-:root{color-scheme:dark;--bg:#090b12;--panel:#111520;--panel2:#171c2b;--text:#f5f6fc;--muted:#8991a8;--accent:#8c70ff;--line:#232a3c;--soft:#25203b;--shadow:0 20px 60px #0005}
-:root[data-theme="light"]{color-scheme:light;--bg:#eef0f7;--panel:#fff;--panel2:#f7f8fc;--text:#202337;--muted:#7c8398;--accent:#765ce7;--line:#e4e7f0;--soft:#f0edff;--shadow:0 16px 48px #1a234010}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif;height:100dvh;overflow:hidden}.wrap{height:100%;max-width:1500px;margin:0 auto;padding:16px 20px;display:flex;flex-direction:column;min-height:0}.brand{font-size:24px;font-weight:800;letter-spacing:3px;color:var(--text);height:42px;flex:none}.brand span{color:var(--accent)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}.auth{max-width:430px;margin:8vh auto;padding:28px}.auth h2{font-size:24px;margin:0 0 18px}.tabs{display:flex;gap:6px;background:var(--panel2);padding:5px;border-radius:13px;margin-bottom:16px}.tabs button{flex:1;border:0;background:transparent}.input,button{border:1px solid var(--line);border-radius:12px;padding:11px 13px;background:var(--panel2);color:var(--text);font:inherit}.input{width:100%;margin:7px 0;outline:none}.input:focus{border-color:var(--accent)}button{cursor:pointer}button.primary{background:var(--accent);border-color:var(--accent);font-weight:700;color:white}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}
-.app-shell{display:flex;flex-direction:column;flex:1;min-height:0;gap:12px}.topbar{height:58px;flex:none;display:flex;align-items:center;gap:10px}.topsearch{position:relative;flex:1;max-width:none}.topsearch .input{margin:0;height:48px;padding-left:44px;border-radius:14px;background:var(--panel)}.searchicon{position:absolute;left:14px;top:11px;color:var(--muted);font-size:20px}.iconbtn{height:48px;width:48px;flex:none;font-size:18px}.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;flex:1;min-height:0}.side{min-width:0;display:flex;flex-direction:column;gap:12px;min-height:0}.side .card{min-height:0;display:flex;flex-direction:column}.chats-panel{flex:1;overflow:hidden}.search-results-panel{max-height:35%;overflow:auto}.sidehead{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}.sidehead h3{margin:0;font-size:15px}.chatlist{display:flex;flex-direction:column;gap:4px;overflow:auto;min-height:0}.chatitem{padding:12px;border:1px solid transparent;border-radius:13px;cursor:pointer;display:flex;flex-direction:column;gap:3px}.chatitem:hover,.chatitem.active{background:var(--panel2);border-color:var(--line)}.chatitem.active{box-shadow:inset 3px 0 var(--accent);background:var(--soft)}.chatitem strong{font-size:14px}.chatpreview{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.userrow{padding:10px;border:1px solid var(--line);border-radius:12px;margin:6px 0;cursor:pointer}.userrow:hover{background:var(--panel2);border-color:var(--accent)}
-main.chat-pane{display:flex;flex-direction:column;min-height:0;min-width:0;padding:14px}.chathead{border-bottom:1px solid var(--line);padding:2px 2px 12px;margin-bottom:10px;min-height:52px;flex:none}.messages{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--bg);border-radius:14px}.bubble{max-width:78%;padding:10px 14px;border-radius:17px;background:var(--panel2);align-self:flex-start;overflow-wrap:anywhere;border:1px solid var(--line)}.bubble.mine{background:var(--accent);color:#fff;align-self:flex-end;border-color:transparent}.sendrow{display:flex;gap:8px;margin-top:10px;flex:none}.sendrow .input{margin:0;flex:1}.emptychat{height:100%;display:grid;place-items:center;text-align:center;color:var(--muted);padding:24px}.notice{min-height:20px;color:#d66b6b;font-size:13px}.profileline{font-size:13px;color:var(--muted);margin-top:5px}.settings{position:fixed;inset:0;z-index:9999;max-width:none;width:100%;height:100dvh;max-height:none;margin:0;border-radius:0;overflow:auto;padding:clamp(18px,4vw,36px);background:var(--bg);display:flex;flex-direction:column;gap:8px;animation:settingsIn .18s ease-out}.settings.hidden{display:none!important}.settings .sidehead{flex:none;padding-bottom:14px;border-bottom:1px solid var(--line)}.settings .settingrow{max-width:680px;width:100%;margin:20px 0}.settings .settingactions{max-width:680px}.settings .notice{max-width:680px}@keyframes settingsIn{from{opacity:.8;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.settingrow{margin:16px 0}.settingrow label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}.settingactions{display:flex;gap:8px;flex-wrap:wrap}.mobile-back{display:none}.avatar{width:54px;height:54px;border-radius:50%;object-fit:cover;background:var(--panel2);border:1px solid var(--line)}.avatar-sm{width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px}.attachment{max-width:min(360px,100%);display:block;border-radius:10px;margin-top:6px}.file-chip{display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin-top:6px}.bubble .forwardbtn{display:block;margin-top:6px;font-size:11px;padding:4px 7px;opacity:.85}.profiles-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.profiles-list button{font-size:12px;padding:7px}
-@media(max-width:760px){body{overflow:hidden}.wrap{padding:7px;gap:5px}.brand{height:27px;font-size:18px;letter-spacing:2px}.app-shell{gap:5px}.topbar{height:42px;gap:5px}.topsearch .input{height:38px;padding-left:32px;font-size:12px;border-radius:10px}.searchicon{left:10px;top:8px;font-size:17px}.iconbtn{width:38px;height:38px;padding:5px;border-radius:10px}.layout{display:grid;grid-template-columns:minmax(112px,40%) minmax(0,60%);gap:6px;position:relative;flex:1;min-height:0}.side{height:100%;gap:5px}.side .card{padding:8px;border-radius:10px}.chats-panel{flex:1;overflow:hidden}.search-results-panel{max-height:35%;overflow:auto;flex:none}.sidehead{margin-bottom:5px}.sidehead h3{font-size:11px}.chatlist{gap:2px}.chatitem{padding:7px 5px;border-radius:8px;gap:3px}.chatitem strong{font-size:clamp(10px,2.8vw,12px);overflow-wrap:anywhere}.chatpreview{font-size:clamp(9px,2.4vw,11px);white-space:normal;line-height:1.3;max-height:2.6em;overflow:hidden}.userrow{padding:5px;font-size:10px;overflow-wrap:anywhere}.chat-pane,main.chat-pane{display:flex!important;position:static;min-width:0;padding:7px;border-radius:10px}.chathead{padding:2px 0 7px;margin-bottom:6px;min-height:42px;font-size:clamp(11px,3vw,13px);overflow-wrap:anywhere}.chathead strong{font-size:clamp(11px,3vw,13px)}.chathead .muted{font-size:9px;overflow-wrap:anywhere}.mobile-back{display:none!important}.messages{padding:7px;gap:7px;border-radius:8px}.bubble{max-width:95%;padding:7px 8px;border-radius:11px;font-size:clamp(11px,3vw,13px)}.sendrow{gap:4px;margin-top:5px}.sendrow .input{font-size:11px;padding:7px 5px;min-width:0}.sendrow button{font-size:clamp(10px,2.7vw,12px);padding:7px 6px;white-space:nowrap}.emptychat{padding:5px;font-size:10px}.auth{margin:4vh auto;padding:20px}.card{padding:8px}.settings{max-width:none;width:100%;height:100dvh;max-height:none;inset:0;padding:18px;border-radius:0;overflow:auto}.settings .settingrow{max-width:100%;width:100%}.settingrow{margin:8px 0}.settingrow label{font-size:11px}.settingactions button{font-size:11px;padding:8px}}
+:root{color-scheme:dark;--bg:#090b12;--panel:#111520;--panel2:#171c2b;--text:#f5f6fc;--muted:#8991a8;--accent:#8c70ff;--accent2:#6a5cff;--line:#232a3c;--soft:#25203b;--shadow:0 20px 60px #0005;--green:#4baf78;--radius:18px}
+:root[data-theme="light"]{color-scheme:light;--bg:#eef0f7;--panel:#fff;--panel2:#f7f8fc;--text:#202337;--muted:#7c8398;--accent:#765ce7;--accent2:#6450e0;--line:#e4e7f0;--soft:#f0edff;--shadow:0 16px 48px #1a234010}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif;height:100dvh;overflow:hidden}
+.wrap{height:100%;max-width:1500px;margin:0 auto;padding:16px 20px;display:flex;flex-direction:column;min-height:0}
+.brand{font-size:24px;font-weight:800;letter-spacing:3px;color:var(--text);height:42px;flex:none;display:flex;align-items:center;gap:8px}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);animation:pulse 2s infinite}
+.brand span{color:var(--accent)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-.replybar{padding:8px 12px;margin:6px 0;background:var(--panel2);border-left:3px solid var(--accent);border-radius:8px;color:var(--muted)}
-.msg-menu{position:fixed;z-index:9999;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:190px}
-.msg-menu button{background:transparent;color:var(--text);border:0;text-align:left;padding:9px 12px;border-radius:8px}
-.msg-menu button:active{background:var(--panel2)}
-.bubble{touch-action:pan-y;user-select:none}.bubble.pinned{outline:1px solid var(--accent)}
-
-/* Orbit UI motion */
-.chatitem{transition:background .16s ease,border-color .16s ease,transform .16s ease}
-.chatitem:active{transform:scale(.985)}
-.bubble{transition:transform .15s ease,box-shadow .15s ease}
-.bubble:hover{box-shadow:0 4px 14px #0002}
-button{transition:filter .12s ease,transform .12s ease}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.auth{max-width:430px;margin:8vh auto;padding:28px;animation:fadeUp .3s ease}
+.auth h2{font-size:24px;margin:0 0 18px}
+.tabs{display:flex;gap:6px;background:var(--panel2);padding:5px;border-radius:13px;margin-bottom:16px}
+.tabs button{flex:1;border:0;background:transparent}
+.input,button{border:1px solid var(--line);border-radius:12px;padding:11px 13px;background:var(--panel2);color:var(--text);font:inherit;outline:none}
+.input{width:100%;margin:7px 0}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(140,112,255,.18)}
+button{cursor:pointer;transition:filter .12s ease,transform .12s ease,background .12s ease}
+button:hover{filter:brightness(1.08)}
 button:active{transform:scale(.97)}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-</style></head><body><div class="wrap"><div class="brand">◈ <span>ORBIT</span></div>
+button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;font-weight:700;color:white}
+.muted{color:var(--muted);font-size:13px}
+.hidden{display:none!important}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes dotBounce{0%,80%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-4px);opacity:1}}
+
+.app-shell{display:flex;flex-direction:column;flex:1;min-height:0;gap:12px}
+.topbar{height:58px;flex:none;display:flex;align-items:center;gap:10px}
+.topsearch{position:relative;flex:1;max-width:none}
+.topsearch .input{margin:0;height:48px;padding-left:44px;border-radius:14px;background:var(--panel)}
+.searchicon{position:absolute;left:14px;top:11px;color:var(--muted);font-size:20px}
+.iconbtn{height:48px;width:48px;flex:none;font-size:18px;display:grid;place-items:center}
+.iconbtn.online{box-shadow:inset 0 0 0 2px var(--green)}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;flex:1;min-height:0}
+.side{min-width:0;display:flex;flex-direction:column;gap:12px;min-height:0}
+.side .card{min-height:0;display:flex;flex-direction:column}
+.chats-panel{flex:1;overflow:hidden}
+.search-results-panel{max-height:35%;overflow:auto}
+.sidehead{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+.sidehead h3{margin:0;font-size:15px}
+.chatlist{display:flex;flex-direction:column;gap:4px;overflow:auto;min-height:0}
+.chatitem{padding:12px;border:1px solid transparent;border-radius:13px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .16s ease,border-color .16s ease,transform .16s ease}
+.chatitem:active{transform:scale(.985)}
+.chatitem:hover,.chatitem.active{background:var(--panel2);border-color:var(--line)}
+.chatitem.active{box-shadow:inset 3px 0 var(--accent);background:var(--soft)}
+.chatitem .ci-body{flex:1;min-width:0}
+.chatitem strong{font-size:14px;display:flex;align-items:center;gap:6px}
+.chatpreview{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.unread{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none}
+.unread.zero{display:none}
+.userrow{padding:10px;border:1px solid var(--line);border-radius:12px;margin:6px 0;cursor:pointer;display:flex;align-items:center;gap:8px}
+.userrow:hover{background:var(--panel2);border-color:var(--accent)}
+
+main.chat-pane{display:flex;flex-direction:column;min-height:0;min-width:0;padding:14px}
+.chathead{border-bottom:1px solid var(--line);padding:2px 2px 12px;margin-bottom:10px;min-height:52px;flex:none;display:flex;align-items:center;gap:10px}
+.chathead .ch-info{flex:1;min-width:0;overflow:hidden}
+.chathead .ch-info strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chathead .ch-info .muted{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chathead .ch-tools{display:flex;gap:6px;flex:none}
+.chathead .ch-tools button{padding:6px 10px;font-size:13px}
+.search-in-chat{position:relative;width:200px;max-width:35vw}
+.search-in-chat .input{padding-left:34px;height:38px;font-size:12px;margin:0}
+.search-in-chat .sic{position:absolute;left:10px;top:9px;color:var(--muted)}
+.search-hits{position:absolute;right:8px;top:9px;font-size:11px;color:var(--muted)}
+.messages{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--bg);border-radius:14px;scroll-behavior:smooth}
+.messages::-webkit-scrollbar{width:8px}
+.messages::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+.bubble{max-width:78%;padding:10px 14px;border-radius:17px;background:var(--panel2);align-self:flex-start;overflow-wrap:anywhere;border:1px solid var(--line);animation:msgIn .2s ease;position:relative;touch-action:pan-y;user-select:none}
+.bubble.mine{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;align-self:flex-end;border-color:transparent}
+.bubble.pinned{outline:1px solid var(--accent)}
+.bubble .time{font-size:10px;opacity:.6;margin-top:4px;text-align:right;line-height:1}
+.bubble.mine .time{color:rgba(255,255,255,.75)}
+.bubble .pintag{font-size:10px;opacity:.8;margin-bottom:2px}
+.sendrow{display:flex;gap:8px;margin-top:10px;flex:none;align-items:flex-end}
+.sendrow .input{margin:0;flex:1;resize:none;max-height:120px}
+.emptychat{height:100%;display:grid;place-items:center;text-align:center;color:var(--muted);padding:24px}
+.notice{min-height:20px;color:#d66b6b;font-size:13px}
+.profileline{font-size:13px;color:var(--muted);margin-top:5px}
+
+.settings{position:fixed;inset:0;z-index:9999;width:100%;height:100dvh;border-radius:0;overflow:auto;padding:clamp(18px,4vw,36px);background:var(--bg);display:flex;flex-direction:column;gap:8px;animation:settingsIn .2s ease-out}
+.settings .sidehead{flex:none;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.settings .settingrow{max-width:680px;width:100%;margin:20px 0}
+.settings .settingactions{max-width:680px}
+.settings .notice{max-width:680px}
+@keyframes settingsIn{from{opacity:.8;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.settingrow{margin:16px 0}
+.settingrow label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.settingactions{display:flex;gap:8px;flex-wrap:wrap}
+.mobile-back{display:none}
+
+.avatar{width:54px;height:54px;border-radius:50%;object-fit:cover;background:var(--panel2);border:1px solid var(--line);flex:none}
+.avatar-sm{width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--panel2);border:1px solid var(--line);flex:none}
+.avatar-xs{width:28px;height:28px;border-radius:50%;object-fit:cover}
+
+.attachment{max-width:min(360px,100%);display:block;border-radius:10px;margin-top:6px;max-height:320px;object-fit:cover;cursor:zoom-in}
+.file-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;margin-top:6px;font-size:12px;text-decoration:none;color:var(--text)}
+.file-chip:hover{border-color:var(--accent)}
+.file-chip .fsize{opacity:.6;font-size:11px}
+.bubble.mine .file-chip{border-color:rgba(255,255,255,.25);color:#fff}
+
+.replybar{padding:6px 10px;margin:2px 0 4px;background:rgba(0,0,0,.18);border-left:3px solid var(--accent);border-radius:6px;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bubble.mine .replybar{color:rgba(255,255,255,.85)}
+.replybar-send{padding:8px 12px;margin:6px 0;background:var(--panel2);border-left:3px solid var(--accent);border-radius:8px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;align-items:center}
+.replybar-send .x{cursor:pointer;font-weight:700}
+
+.msg-menu{position:fixed;z-index:9999;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:190px;animation:fadeUp .12s ease}
+.msg-menu button{background:transparent;color:var(--text);border:0;text-align:left;padding:9px 12px;border-radius:8px}
+.msg-menu button:hover{background:var(--panel2)}
+
+.typing{display:inline-flex;gap:3px;align-items:center;padding:6px 0}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:dotBounce 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+
+.lightbox{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.92);display:grid;place-items:center;cursor:zoom-out;padding:20px}
+.lightbox img{max-width:100%;max-height:100%;border-radius:12px}
+
+.profiles-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.profiles-list button{font-size:12px;padding:7px}
+
+@media(max-width:760px){
+  body{overflow:hidden}
+  .wrap{padding:7px;gap:5px}
+  .brand{height:27px;font-size:18px;letter-spacing:2px}
+  .app-shell{gap:5px}
+  .topbar{height:42px;gap:5px}
+  .topsearch .input{height:38px;padding-left:32px;font-size:12px;border-radius:10px}
+  .searchicon{left:10px;top:8px;font-size:17px}
+  .iconbtn{width:38px;height:38px;padding:5px;border-radius:10px}
+  .layout{display:grid;grid-template-columns:minmax(112px,40%) minmax(0,60%);gap:6px;position:relative;flex:1;min-height:0}
+  .side{height:100%;gap:5px}
+  .side .card{padding:8px;border-radius:10px}
+  .chats-panel{flex:1;overflow:hidden}
+  .search-results-panel{max-height:35%;overflow:auto;flex:none}
+  .sidehead{margin-bottom:5px}
+  .sidehead h3{font-size:11px}
+  .chatlist{gap:2px}
+  .chatitem{padding:7px 5px;border-radius:8px;gap:6px}
+  .avatar-sm{width:28px;height:28px}
+  .chatitem strong{font-size:clamp(10px,2.8vw,12px);overflow-wrap:anywhere}
+  .chatpreview{font-size:clamp(9px,2.4vw,11px);white-space:normal;line-height:1.3;max-height:2.6em;overflow:hidden}
+  .userrow{padding:5px;font-size:10px;overflow-wrap:anywhere}
+  main.chat-pane{padding:7px;border-radius:10px}
+  .chathead{padding:2px 0 7px;margin-bottom:6px;min-height:42px;font-size:clamp(11px,3vw,13px);overflow-wrap:anywhere}
+  .chathead strong{font-size:clamp(11px,3vw,13px)}
+  .chathead .muted{font-size:9px;overflow-wrap:anywhere}
+  .mobile-back{display:inline-block!important;padding:4px 8px;font-size:12px}
+  .search-in-chat{width:72px;max-width:none}
+  .search-in-chat .input{padding-left:26px;font-size:10px}
+  .search-in-chat .sic{left:7px;top:10px;font-size:14px}
+  .search-hits{display:none}
+  .messages{padding:7px;gap:7px;border-radius:8px}
+  .bubble{max-width:95%;padding:7px 8px;border-radius:11px;font-size:clamp(11px,3vw,13px)}
+  .sendrow{gap:4px;margin-top:5px}
+  .sendrow .input{font-size:11px;padding:7px 5px;min-width:0}
+  .sendrow button{font-size:clamp(10px,2.7vw,12px);padding:7px 6px;white-space:nowrap}
+  .emptychat{padding:5px;font-size:10px}
+  .auth{margin:4vh auto;padding:20px}
+  .card{padding:8px}
+  .settings{inset:0;padding:18px;border-radius:0;overflow:auto}
+  .settings .settingrow{max-width:100%;width:100%}
+  .settingrow{margin:8px 0}
+  .settingrow label{font-size:11px}
+  .settingactions button{font-size:11px;padding:8px}
+}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style></head><body><div class="wrap"><div class="brand"><span class="dot"></span>◈ <span>ORBIT</span></div>
 <section id="auth" class="card auth"><h2 id="authTitle">Создать аккаунт</h2><div class="tabs"><button id="registerTab" class="primary" onclick="setMode('register')">Регистрация</button><button id="loginTab" onclick="setMode('login')">Вход</button></div><div id="displayBox"><input class="input" id="display" placeholder="Имя" maxlength="40"><input class="input" id="email" type="email" placeholder="Email"></div><input class="input" id="username" placeholder="Username или email"><input class="input" id="password" type="password" placeholder="Пароль (минимум 8 символов)"><button class="primary" style="width:100%" id="authBtn" onclick="authAction()">Создать аккаунт</button><div id="twoFactorBox" class="hidden"><input class="input" id="otpCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-значный код из email"><button class="primary" style="width:100%" id="verifyBtn" onclick="verifyCode()">Подтвердить код</button></div><div class="notice" id="authNotice"></div></section>
 <section id="app" class="hidden app-shell">
   <div class="topbar"><div class="topsearch"><span class="searchicon">⌕</span><input class="input" id="search" placeholder="Поиск по ID или username" oninput="searchUsers()"></div><button onclick="enableOrbitNotifications()" title="Включить уведомления">🔔</button><button class="iconbtn" title="Настройки" onclick="showSettings()">⚙</button></div>
   <div id="settingsPanel" class="card settings hidden"><div class="sidehead"><h3>Настройки</h3><button onclick="hideSettings()">✕</button></div><div class="settingrow"><label>Аватар</label><img id="settingsAvatar" class="avatar" alt="Аватар"><input type="file" id="avatarFile" accept="image/*" class="input"><button onclick="uploadAvatar()">Загрузить аватар</button></div><div class="settingrow"><label>Тема оформления</label><div class="settingactions"><button id="darkTheme" onclick="setTheme('dark')">🌙 Ночная</button><button id="lightTheme" onclick="setTheme('light')">☀️ Дневная</button></div></div><div class="settingrow"><label for="settingsUsername">Юзернейм</label><input class="input" id="settingsUsername" placeholder="username"></div><div class="settingrow"><label for="settingsEmail">Электронная почта</label><input class="input" id="settingsEmail" type="email" placeholder="Добавить email"></div><div class="muted">ID аккаунта нельзя изменить.</div><div class="settingactions" style="margin-top:12px"><button class="primary" onclick="saveSettings()">Сохранить изменения</button><button class="primary" onclick="addProfile()">＋ Добавить профиль</button><button onclick="logout()">Выйти из аккаунта</button></div><div class="settingrow"><label>Мои профили · переключение без повторного пароля</label><div id="savedProfiles" class="profiles-list"></div></div><div class="notice" id="settingsNotice"></div></div>
   <div class="layout" id="workspace"><aside class="side"><div class="card chats-panel"><div class="sidehead"><h3>Мои чаты</h3><span class="muted" id="chatCount"></span></div><div id="chatList" class="chatlist"><div class="muted">Пока нет чатов</div></div></div><div class="card search-results-panel"><div class="sidehead"><h3>Найти людей</h3></div><div id="results" class="muted">Начните вводить ID или username в поиске сверху</div></div></aside>
-  <main class="card chat-pane"><div class="chathead"><button class="mobile-back" onclick="backToList()">← Чаты</button><strong id="chatTitle">Выберите чат</strong><div class="muted" id="chatMeta"></div></div><div class="messages" id="messages"><div class="emptychat">Выберите диалог слева или найдите пользователя через поиск сверху</div></div><div id="replyBar" class="replybar hidden"></div><div class="sendrow"><input type="file" id="attachFile" class="hidden" accept="image/*,video/*,audio/*,.pdf,.txt,.zip"><button onclick="document.getElementById('attachFile').click()" title="Прикрепить">＋</button><input class="input" id="messageInput" placeholder="Сообщение..." onkeydown="if(event.key==='Enter')sendMessage()"><button class="primary" onclick="sendMessage()">Отправить</button></div></main></div>
+  <main class="card chat-pane"><div class="chathead"><button class="mobile-back" onclick="backToList()">← Чаты</button><div class="ch-info"><strong id="chatTitle">Выберите чат</strong><div class="muted" id="chatMeta"></div></div><div class="ch-tools"><div class="search-in-chat"><span class="sic">⌕</span><input class="input" id="chatSearch" placeholder="Поиск в чате" oninput="filterMessages()"><span class="search-hits" id="chatSearchHits"></span></div></div></div><div class="messages" id="messages"><div class="emptychat">Выберите диалог слева или найдите пользователя через поиск сверху</div></div><div id="replyBar" class="replybar-send hidden"><span id="replyText"></span><span class="x" onclick="cancelReply()">✕</span></div><div class="sendrow"><input type="file" id="attachFile" class="hidden" accept="image/*,video/*,audio/*,.pdf,.txt,.zip"><button onclick="document.getElementById('attachFile').click()" title="Прикрепить">＋</button><textarea class="input" id="messageInput" placeholder="Сообщение..." rows="1" onkeydown="onInputKey(event)" oninput="onTyping()"></textarea><button class="primary" onclick="sendMessage()">Отправить</button></div></main></div>
   <div class="hidden" aria-hidden="true"><img id="myAvatar" class="avatar-sm" alt=""><div id="myName"></div><div id="myMeta" class="profileline"></div></div>
 </section></div>
 <script>
-let modeValue='register',me=null,active=null,searchTimer;
-// Send each API request with the currently selected profile's own session.
-const orbitNativeFetch=window.fetch.bind(window);
-window.fetch=(resource,options={})=>{
-  const url=typeof resource==='string'?resource:(resource&&resource.url)||'';
-  if(url.startsWith('/api/') || url.startsWith('/uploads/')){
-    const token=localStorage.getItem('orbit_active_token');
-    if(token){
-      const headers=new Headers(options.headers || (resource instanceof Request ? resource.headers : undefined));
-      headers.set('Authorization','Bearer '+token);
-      options={...options,headers};
+// ---------- Auth-aware fetch (single wrapper) ----------
+const _fetch=window.fetch.bind(window);
+window.fetch=(input,init={})=>{
+  const url=typeof input==='string'?input:(input&&input.url)||'';
+  if(url.startsWith('/api/')||url.startsWith('/uploads/')||url.startsWith('/ws')){
+    const tok=localStorage.getItem('orbit_active_token');
+    if(tok){
+      const h=new Headers(init.headers||{});
+      if(!h.has('Authorization')) h.set('Authorization','Bearer '+tok);
+      init={...init,headers:h};
     }
   }
-  return orbitNativeFetch(resource,options);
+  return _fetch(input,init);
 };
-const nativeFetch=window.fetch.bind(window);
-window.fetch=(input,init={})=>{const headers=new Headers(init.headers||{});const tok=localStorage.getItem('orbit_active_token');if(tok&&!headers.has('Authorization'))headers.set('Authorization','Bearer '+tok);return nativeFetch(input,{...init,headers});};
-const pendingSwitch=localStorage.getItem('orbit_switch_username');if(pendingSwitch){localStorage.removeItem('orbit_switch_username');setMode('login');document.getElementById('username').value=pendingSwitch;}
+
+const pendingSwitch=localStorage.getItem('orbit_switch_username');
+if(pendingSwitch){localStorage.removeItem('orbit_switch_username');setMode('login');document.getElementById('username').value=pendingSwitch;}
+
+let me=null,active=null,searchTimer,ws=null,wsRetry=0;
+let messagesById=new Map();      // id -> message object (current chat)
+let chatNodes=new Map(),chatSignatures=new Map();
+let replyingTo=null;
+let messageRefreshBusy=false,renderedMessageChat=null;
+let renderedMessageNodes=new Map(),renderedMessageSignatures=new Map();
+let typingTimer=null,partnerTypingTimer=null;
+let chatSearchQuery='';
+
+// ---------- Theme ----------
 function setTheme(theme){document.documentElement.dataset.theme=theme;localStorage.setItem('orbit_theme',theme);document.getElementById('darkTheme')?.classList.toggle('primary',theme==='dark');document.getElementById('lightTheme')?.classList.toggle('primary',theme==='light');}
 setTheme(localStorage.getItem('orbit_theme')||'dark');
+
+// ---------- Auth ----------
 function setMode(m){modeValue=m;document.getElementById('twoFactorBox').classList.add('hidden');document.getElementById('authBtn').classList.remove('hidden');document.getElementById('otpCode').value='';document.getElementById('authTitle').textContent=m==='register'?'Создать аккаунт':'Войти';document.getElementById('displayBox').classList.toggle('hidden',m==='login');document.getElementById('username').placeholder=m==='register'?'Юзернейм (латиница, цифры, _)':'Юзернейм или email';document.getElementById('authBtn').textContent=m==='register'?'Создать аккаунт':'Войти';document.getElementById('registerTab').classList.toggle('primary',m==='register');document.getElementById('loginTab').classList.toggle('primary',m==='login');document.getElementById('authNotice').textContent='';}
 async function authAction(){let data={username:document.getElementById('username').value.trim(),password:document.getElementById('password').value};if(modeValue==='register'){data.display_name=document.getElementById('display').value.trim();data.email=document.getElementById('email').value.trim();}let r=await fetch('/api/'+modeValue,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});let j=await r.json();let note=document.getElementById('authNotice');if(!r.ok){note.textContent=j.detail||'Ошибка';return;}if(modeValue==='register'){note.style.color='var(--accent)';note.textContent=j.detail||'Аккаунт создан. Переключитесь на вход.';setMode('login');return;}note.textContent=j.detail+(j.email_hint?' · '+j.email_hint:'');document.getElementById('twoFactorBox').classList.remove('hidden');document.getElementById('authBtn').classList.add('hidden');document.getElementById('otpCode').focus();}
 async function verifyCode(){let code=document.getElementById('otpCode').value.trim(),identifier=document.getElementById('username').value.trim();let r=await fetch('/api/verify-2fa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:identifier,code})});let j=await r.json();if(!r.ok){document.getElementById('authNotice').textContent=j.detail||'Код не принят';return;}localStorage.setItem('orbit_active_token',j.token);let saved=savedProfiles();const profile={username:(j.username||identifier).toLowerCase().replace(/^@/,''),display_name:identifier,token:j.token};const idx=saved.findIndex(p=>p.username===profile.username);if(idx>=0)saved[idx]=profile;else saved.push(profile);localStorage.setItem('orbit_profiles',JSON.stringify(saved));await loadMe();}
-async function loadMe(){let r=await fetch('/api/me');if(!r.ok)return;me=await r.json();document.getElementById('auth').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('myName').textContent=me.display_name;document.getElementById('myAvatar').src=me.avatar||'';document.getElementById('settingsAvatar').src=me.avatar||'';document.getElementById('myMeta').textContent='@'+me.username+' · ID '+me.id+(me.email?' · '+me.email:'');document.getElementById('settingsUsername').value=me.username;document.getElementById('settingsEmail').value=me.email||'';renderSavedProfiles();loadChats();}
+async function loadMe(){let r=await fetch('/api/me');if(!r.ok)return;me=await r.json();document.getElementById('auth').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('myName').textContent=me.display_name;document.getElementById('myAvatar').src=me.avatar||'';document.getElementById('settingsAvatar').src=me.avatar||'';document.getElementById('myMeta').textContent='@'+me.username+' · ID '+me.id+(me.email?' · '+me.email:'');document.getElementById('settingsUsername').value=me.username;document.getElementById('settingsEmail').value=me.email||'';renderSavedProfiles();connectWS();loadChats();}
 function showSettings(){document.getElementById('settingsPanel').classList.remove('hidden');document.getElementById('settingsNotice').textContent='';}
 function hideSettings(){document.getElementById('settingsPanel').classList.add('hidden');}
 async function saveSettings(){let data={username:document.getElementById('settingsUsername').value.trim(),email:document.getElementById('settingsEmail').value.trim()};let r=await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});let j=await r.json();let note=document.getElementById('settingsNotice');if(!r.ok){note.textContent=j.detail||'Не удалось сохранить';return;}me=j.user;document.getElementById('myMeta').textContent='@'+me.username+' · ID '+me.id+(me.email?' · '+me.email:'');note.style.color='#4baf78';note.textContent='Настройки сохранены';}
-function searchUsers(){clearTimeout(searchTimer);searchTimer=setTimeout(async()=>{let q=document.getElementById('search').value.trim();let box=document.getElementById('results');if(q.length<2){box.textContent='Начните вводить ID или username в поиске сверху';return;}let r=await fetch('/api/users?q='+encodeURIComponent(q));if(!r.ok)return;let j=await r.json();box.innerHTML='';if(!j.users.length){box.textContent='Ничего не найдено';return;}j.users.forEach(u=>{let el=document.createElement('div');el.className='userrow';if(u.avatar){let im=document.createElement('img');im.src=u.avatar;im.className='avatar-sm';el.appendChild(im);}let label=document.createElement('span');label.textContent=u.display_name+' · @'+u.username+' · ID '+u.id;el.appendChild(label);el.onclick=()=>openChat(u);box.appendChild(el);});},250)}
-let chatNodes=new Map(),chatSignatures=new Map();
+
+// ---------- User search ----------
+function searchUsers(){clearTimeout(searchTimer);searchTimer=setTimeout(async()=>{let q=document.getElementById('search').value.trim();let box=document.getElementById('results');if(q.length<2){box.textContent='Начните вводить ID или username в поиске сверху';return;}let r=await fetch('/api/users?q='+encodeURIComponent(q));if(!r.ok)return;let j=await r.json();box.innerHTML='';if(!j.users.length){box.textContent='Ничего не найдено';return;}j.users.forEach(u=>{let el=document.createElement('div');el.className='userrow';if(u.avatar){let im=document.createElement('img');im.src=u.avatar;im.className='avatar-xs';el.appendChild(im);}let label=document.createElement('span');label.textContent=u.display_name+' · @'+u.username+' · ID '+u.id;el.appendChild(label);el.onclick=()=>openChat(u);box.appendChild(el);});},250)}
+
+// ---------- Chat list (diffed) ----------
 async function loadChats(){
   let r=await fetch('/api/chats');if(!r.ok)return;let j=await r.json(),box=document.getElementById('chatList');
   document.getElementById('chatCount').textContent=j.chats.length?String(j.chats.length):'';
   if(!j.chats.length){for(const node of chatNodes.values())node.remove();chatNodes.clear();chatSignatures.clear();if(!box.firstChild||box.firstChild.textContent!=='Пока нет чатов. Найди пользователя через поиск сверху.')box.innerHTML='<div class="muted">Пока нет чатов. Найди пользователя через поиск сверху.</div>';return;}
   const nextNodes=new Map(),nextSignatures=new Map();
   for(const u of j.chats){
-    const signature=JSON.stringify([u.display_name,u.username,u.avatar||'',u.last_message||'']);
+    const signature=JSON.stringify([u.display_name,u.username,u.avatar||'',u.last_message||'',u.unread||0,u.last_time]);
     let el=chatNodes.get(u.id);
     if(!el){el=document.createElement('div');el.className='chatitem';}
-    if(chatSignatures.get(u.id)!==signature){el.replaceChildren();if(u.avatar){let im=document.createElement('img');im.src=u.avatar;im.className='avatar-sm';el.appendChild(im);}let strong=document.createElement('strong');strong.textContent=u.display_name+' · @'+u.username;el.appendChild(strong);let preview=document.createElement('div');preview.className='chatpreview';preview.textContent=u.last_message||'Начните переписку';el.appendChild(preview);}
+    if(chatSignatures.get(u.id)!==signature){
+      el.replaceChildren();
+      if(u.avatar){let im=document.createElement('img');im.src=u.avatar;im.className='avatar-sm';el.appendChild(im);}
+      let body=document.createElement('div');body.className='ci-body';
+      let strong=document.createElement('strong');strong.textContent=u.display_name+' · @'+u.username;body.appendChild(strong);
+      let preview=document.createElement('div');preview.className='chatpreview';preview.textContent=u.last_message||'Начните переписку';body.appendChild(preview);
+      el.appendChild(body);
+      let badge=document.createElement('span');badge.className='unread '+(u.unread>0?'':'zero');badge.textContent=u.unread>99?'99+':String(u.unread||0);el.appendChild(badge);
+    } else {
+      // update only the badge to avoid full re-render
+      const badge=el.querySelector('.unread');
+      if(badge){badge.textContent=u.unread>99?'99+':String(u.unread||0);badge.classList.toggle('zero',!(u.unread>0));}
+    }
     el.className='chatitem'+(active&&active.id===u.id?' active':'');el.onclick=()=>openChat(u);nextNodes.set(u.id,el);nextSignatures.set(u.id,signature);
   }
   for(const [id,node] of chatNodes)if(!nextNodes.has(id))node.remove();
@@ -80,68 +256,123 @@ async function loadChats(){
   chatNodes=nextNodes;chatSignatures=nextSignatures;
 }
 function backToList(){document.getElementById("workspace").classList.remove("mobile-chat-open");}
-async function openChat(u){active=u;document.getElementById("workspace").classList.add("mobile-chat-open");document.getElementById('chatTitle').textContent=u.display_name;document.getElementById('chatMeta').textContent='@'+u.username+' · ID '+u.id;loadChats();refreshMessages();}
-let replyingTo=null;
-let messageRefreshBusy=false;
-let renderedMessageChat=null;
-let renderedMessageNodes=new Map();
-let renderedMessageSignatures=new Map();
+async function openChat(u){active=u;document.getElementById("workspace").classList.add("mobile-chat-open");document.getElementById('chatTitle').textContent=u.display_name;document.getElementById('chatMeta').textContent='@'+u.username+' · ID '+u.id;document.getElementById('chatSearch').value='';chatSearchQuery='';loadChats();await refreshMessages();markRead();}
+
+// ---------- Messages ----------
 async function refreshMessages(){
-  if(!active || messageRefreshBusy || document.hidden)return;
-  const chatId=active.id;
-  messageRefreshBusy=true;
+  if(!active||messageRefreshBusy)return;
+  const chatId=active.id;messageRefreshBusy=true;
   try{
     let r=await fetch('/api/messages/'+chatId);if(!r.ok)return;
     let j=await r.json();
-    // Ignore a response for a chat that was switched away while the request was running.
-    if(!active || active.id!==chatId)return;
+    if(!active||active.id!==chatId)return;
     let box=document.getElementById('messages');
-    const nearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<90;
-    const byId=new Map(j.messages.map(m=>[m.id,m]));
+    const nearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<120;
+    messagesById=new Map(j.messages.map(m=>[m.id,m]));
     if(renderedMessageChat!==chatId){renderedMessageNodes=new Map();renderedMessageSignatures=new Map();box.replaceChildren();renderedMessageChat=chatId;}
     const nextNodes=new Map(),nextSignatures=new Map();
     for(const m of j.messages){
-      const signature=JSON.stringify([m.sender_id,m.body,m.attachment_json,m.reply_to_id,m.pinned]);
+      const signature=JSON.stringify([m.sender_id,m.body,m.attachment_json,m.reply_to_id,m.pinned,m.created_at]);
       let node=renderedMessageNodes.get(m.id);
-      if(!node || renderedMessageSignatures.get(m.id)!==signature){
-        const fresh=renderMessage(m,byId);
+      if(!node||renderedMessageSignatures.get(m.id)!==signature){
+        const fresh=renderMessage(m,messagesById);
         if(node&&node.isConnected)node.replaceWith(fresh);
         node=fresh;
       }
       nextNodes.set(m.id,node);nextSignatures.set(m.id,signature);
     }
-    // Remove deleted messages, and place nodes in server order without recreating them.
     for(const [id,node] of renderedMessageNodes){if(!nextNodes.has(id))node.remove();}
     let cursor=box.firstChild;
     for(const m of j.messages){const node=nextNodes.get(m.id);if(node!==cursor)box.insertBefore(node,cursor);cursor=node.nextSibling;}
     renderedMessageNodes=nextNodes;renderedMessageSignatures=nextSignatures;
     if(nearBottom)box.scrollTop=box.scrollHeight;
+    filterMessages();
   }catch(e){}finally{messageRefreshBusy=false;}
 }
+
+function formatTime(ts){
+  if(!ts)return'';
+  const d=new Date(ts*1000),now=new Date();
+  const sameDay=d.toDateString()===now.toDateString();
+  const hh=String(d.getHours()).padStart(2,'0'),mm=String(d.getMinutes()).padStart(2,'0');
+  if(sameDay)return hh+':'+mm;
+  const yesterday=new Date(now);yesterday.setDate(now.getDate()-1);
+  if(d.toDateString()===yesterday.toDateString())return 'вчера '+hh+':'+mm;
+  return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'short'})+' '+hh+':'+mm;
+}
+
+function renderMessage(m,byId){
+  let el=document.createElement('div');
+  el.className='bubble'+(m.sender_id===me.id?' mine':'')+(m.pinned?' pinned':'');
+  el.dataset.id=m.id;
+  if(m.pinned){let p=document.createElement('div');p.className='pintag';p.textContent='📌 Закреплено';el.appendChild(p);}
+  if(m.reply_to_id&&byId.has(m.reply_to_id)){
+    let q=document.createElement('div');q.className='replybar';q.textContent='↪ '+(byId.get(m.reply_to_id).body||'Вложение');el.appendChild(q);
+  }
+  if(m.body){let txt=document.createElement('div');txt.textContent=m.body;el.appendChild(txt);}
+  if(m.attachment_json){try{addAttachmentPreview(el,JSON.parse(m.attachment_json))}catch{}}
+  let t=document.createElement('div');t.className='time';t.textContent=formatTime(m.created_at);el.appendChild(t);
+  return el;
+}
+
+// ---------- Message interactions (event delegation) ----------
+let longPressTimer=null,longPressFired=false,lpStartX=0,lpStartY=0,lpMessageId=null;
+const messagesBox=document.getElementById('messages');
+messagesBox.addEventListener('pointerdown',e=>{
+  const b=e.target.closest('.bubble');if(!b)return;
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  clearLongPress();
+  lpMessageId=Number(b.dataset.id);longPressFired=false;
+  lpStartX=e.clientX;lpStartY=e.clientY;
+  const x=lpStartX,y=lpStartY;
+  longPressTimer=setTimeout(()=>{longPressTimer=null;longPressFired=true;const m=messagesById.get(lpMessageId);if(m)showMessageMenu(m,x,y);},500);
+});
+messagesBox.addEventListener('pointerup',clearLongPress);
+messagesBox.addEventListener('pointercancel',clearLongPress);
+messagesBox.addEventListener('pointerleave',clearLongPress);
+messagesBox.addEventListener('pointermove',e=>{
+  if(longPressTimer&&(Math.abs(e.clientX-lpStartX)>12||Math.abs(e.clientY-lpStartY)>12))clearLongPress();
+});
+messagesBox.addEventListener('contextmenu',e=>{
+  const b=e.target.closest('.bubble');if(!b)return;
+  e.preventDefault();clearLongPress();
+  const m=messagesById.get(Number(b.dataset.id));if(m)showMessageMenu(m,e.clientX,e.clientY);
+});
+let tStartX=0,tStartY=0;
+messagesBox.addEventListener('touchstart',e=>{const t=e.changedTouches[0];tStartX=t.clientX;tStartY=t.clientY;},{passive:true});
+messagesBox.addEventListener('touchend',e=>{
+  if(longPressFired)return;
+  const b=e.target.closest('.bubble');if(!b)return;
+  const t=e.changedTouches[0];const dx=t.clientX-tStartX,dy=t.clientY-tStartY;
+  if(dx<-65&&Math.abs(dy)<55){const m=messagesById.get(Number(b.dataset.id));if(m)setReply(m);}
+},{passive:true});
+
+function clearLongPress(){if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}}
+
 function setReply(m){
   replyingTo=m;
   const bar=document.getElementById('replyBar');
   bar.classList.remove('hidden');
-  bar.textContent='Ответ на: '+(m.body||'вложение')+'  ×';
-  bar.onclick=()=>{replyingTo=null;bar.classList.add('hidden');};
+  document.getElementById('replyText').textContent='Ответ на: '+(m.body||'вложение');
   document.getElementById('messageInput').focus();
 }
+function cancelReply(){replyingTo=null;document.getElementById('replyBar').classList.add('hidden');}
+
 async function sendMessage(){
   if(!active)return;
   let input=document.getElementById('messageInput'),body=input.value.trim(),file=document.getElementById('attachFile').files[0],attachment=null;
   if(!body&&!file)return;
   try{if(file)attachment=await uploadAttachment(file);}catch(e){alert(e.message);return;}
-  input.value='';document.getElementById('attachFile').value='';
+  input.value='';input.style.height='auto';document.getElementById('attachFile').value='';
   let payload={recipient_id:active.id,body,attachment,reply_to_id:replyingTo?replyingTo.id:null};
   let r=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  if(r.ok){replyingTo=null;document.getElementById('replyBar').classList.add('hidden');refreshMessages();loadChats();}
+  if(r.ok){cancelReply();}
   else{let j=await r.json();alert(j.detail||'Не удалось отправить');}
 }
 async function messageAction(m,action){
   const r=await fetch('/api/message-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message_id:m.id,action})});
   const j=await r.json().catch(()=>({}));
   if(!r.ok){alert(j.detail||'Не удалось выполнить действие');return;}
-  refreshMessages();
 }
 function closeMessageMenu(){document.querySelectorAll('.msg-menu').forEach(x=>x.remove());}
 function showMessageMenu(m,x,y){
@@ -158,53 +389,138 @@ function showMessageMenu(m,x,y){
   document.body.appendChild(menu);
   const left=Math.min(x,innerWidth-menu.offsetWidth-8),top=Math.min(y,innerHeight-menu.offsetHeight-8);
   menu.style.left=Math.max(8,left)+'px';menu.style.top=Math.max(8,top)+'px';
-  // Outside-pointer listener avoids the click generated after a long press closing the menu immediately.
-  setTimeout(()=>{
-    const outside=(ev)=>{
-      if(!menu.isConnected){document.removeEventListener('pointerdown',outside);return;}
-      if(!menu.contains(ev.target)){closeMessageMenu();document.removeEventListener('pointerdown',outside);}
-    };
-    document.addEventListener('pointerdown',outside);
-  },0);
+  setTimeout(()=>{const outside=(ev)=>{if(!menu.isConnected){document.removeEventListener('pointerdown',outside);return;}if(!menu.contains(ev.target)){closeMessageMenu();document.removeEventListener('pointerdown',outside);}};document.addEventListener('pointerdown',outside);},0);
 }
 async function forwardMessage(m){
   let dest=prompt('ID получателя для пересылки:');if(!dest)return;
   let rr=await fetch('/api/forward',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message_id:m.id,recipient_id:dest})});
   let jj=await rr.json();alert(rr.ok?'Переслано':(jj.detail||'Ошибка'));
 }
-function renderMessage(m,byId=new Map()){
-  let el=document.createElement('div');el.className='bubble'+(m.sender_id===me.id?' mine':'')+(m.pinned?' pinned':'');
-  if(m.reply_to_id && byId.has(m.reply_to_id)){
-    let q=document.createElement('div');q.className='replybar';q.textContent='↪ '+(byId.get(m.reply_to_id).body||'Вложение');el.appendChild(q);
+
+// ---------- Attachments ----------
+function humanSize(bytes){if(!bytes)return'';const u=['Б','КБ','МБ','ГБ'];let i=0;while(bytes>=1024&&i<u.length-1){bytes/=1024;i++;}return bytes.toFixed(i===0?0:1)+' '+u[i];}
+async function uploadAttachment(file){let fd=new FormData();fd.append('file',file);let r=await fetch('/api/upload',{method:'POST',body:fd});let j=await r.json();if(!r.ok)throw new Error(j.detail||'Ошибка загрузки файла');return j.attachment;}
+function addAttachmentPreview(parent,a){
+  if(!a)return;let url=a.url;
+  if((a.type||'').startsWith('image/')){
+    let img=document.createElement('img');img.src=url;img.alt=a.name||'';img.className='attachment';img.loading='lazy';
+    img.onclick=()=>openLightbox(url);
+    parent.appendChild(img);
+  }else if((a.type||'').startsWith('video/')){
+    let v=document.createElement('video');v.src=url;v.controls=true;v.className='attachment';v.preload='metadata';parent.appendChild(v);
+  }else if((a.type||'').startsWith('audio/')){
+    let au=document.createElement('audio');au.src=url;au.controls=true;au.className='attachment';parent.appendChild(au);
+  }else{
+    let link=document.createElement('a');link.href=url;link.target='_blank';link.className='file-chip';
+    link.innerHTML='<span>📎 '+(a.name||'Файл')+'</span><span class="fsize">'+humanSize(a.size)+'</span>';
+    parent.appendChild(link);
   }
-  if(m.pinned){let p=document.createElement('small');p.textContent='📌 Закреплено';el.appendChild(p);}
-  if(m.body){let txt=document.createElement('div');txt.textContent=m.body;el.appendChild(txt);}
-  if(m.attachment_json){try{addAttachmentPreview(el,JSON.parse(m.attachment_json))}catch{}}
-  let timer=null,longPressed=false,startX=0,startY=0;
-  const cancelLongPress=()=>{if(timer){clearTimeout(timer);timer=null;}};
-  el.addEventListener('pointerdown',e=>{
-    if(e.pointerType==='mouse' && e.button!==0)return;
-    cancelLongPress();
-    longPressed=false;
-    startX=e.clientX; startY=e.clientY;
-    const x=startX,y=startY;
-    timer=setTimeout(()=>{timer=null;longPressed=true;showMessageMenu(m,x,y);},550);
-  });
-  el.addEventListener('pointerup',cancelLongPress);
-  el.addEventListener('pointercancel',cancelLongPress);
-  el.addEventListener('pointerleave',cancelLongPress);
-  el.addEventListener('pointermove',e=>{
-    if(timer && (Math.abs(e.clientX-startX)>12 || Math.abs(e.clientY-startY)>12)) cancelLongPress();
-  });
-  el.addEventListener('contextmenu',e=>{e.preventDefault();cancelLongPress();showMessageMenu(m,e.clientX,e.clientY);});
-  let sx=0,sy=0;
-  el.addEventListener('touchstart',e=>{sx=e.changedTouches[0].clientX;sy=e.changedTouches[0].clientY;},{passive:true});
-  el.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(dx < -65 && Math.abs(dy)<55){setReply(m);}}, {passive:true});
-  return el;
+}
+function openLightbox(url){
+  const lb=document.createElement('div');lb.className='lightbox';
+  const img=document.createElement('img');img.src=url;lb.appendChild(img);
+  lb.onclick=()=>lb.remove();
+  document.body.appendChild(lb);
 }
 
+// ---------- In-chat search ----------
+function filterMessages(){
+  const q=chatSearchQuery.trim().toLowerCase();
+  const hitsEl=document.getElementById('chatSearchHits');
+  let hits=0;
+  renderedMessageNodes.forEach(node=>{
+    if(!q){node.style.display='';return;}
+    const m=messagesById.get(Number(node.dataset.id));
+    const ok=m&&(m.body||'').toLowerCase().includes(q);
+    node.style.display=ok?'':'none';
+    if(ok)hits++;
+  });
+  hitsEl.textContent=q?(hits+'/'+messagesById.size):'';
+}
+document.getElementById('chatSearch').addEventListener('input',e=>{chatSearchQuery=e.target.value;filterMessages();});
+
+// ---------- Typing ----------
+function onInputKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function onTyping(){
+  // auto-resize textarea
+  const ta=document.getElementById('messageInput');
+  ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,120)+'px';
+  if(!active||!ws||ws.readyState!==1)return;
+  clearTimeout(typingTimer);
+  try{ws.send(JSON.stringify({type:'typing',to:active.id}));}catch{}
+  typingTimer=setTimeout(()=>{},1500);
+}
+function showPartnerTyping(){
+  const meta=document.getElementById('chatMeta');
+  meta.innerHTML='<span class="typing"><span></span><span></span><span></span></span> печатает...';
+  clearTimeout(partnerTypingTimer);
+  partnerTypingTimer=setTimeout(()=>{if(active)meta.textContent='@'+active.username+' · ID '+active.id;},3000);
+}
+function markRead(){
+  if(!active||!ws||ws.readyState!==1)return;
+  const ids=[...messagesById.keys()];
+  if(!ids.length)return;
+  const last=Math.max(...ids);
+  try{ws.send(JSON.stringify({type:'mark_read',other_id:active.id,message_id:last}));}catch{}
+}
+
+// ---------- WebSocket ----------
+function connectWS(){
+  if(!me)return;
+  const proto=location.protocol==='https:'?'wss:':'ws:';
+  const tok=localStorage.getItem('orbit_active_token');
+  try{ws=new WebSocket(proto+'//'+location.host+'/ws?token='+encodeURIComponent(tok||''));}
+  catch(e){ws=null;scheduleReconnect();return;}
+  // The server reads Authorization header, but browsers can't set WS headers.
+  // Fall back: send token as first message if ?token not supported.
+  ws.onopen=()=>{wsRetry=0;console.log('[Orbit] WS connected');try{ws.send(JSON.stringify({type:'auth',token:tok}));}catch{}};
+  ws.onmessage=(e)=>{
+    let data;try{data=JSON.parse(e.data);}catch{return;}
+    if(data.type==='hello')return;
+    if(data.type==='chat_updated'){
+      loadChats();
+      if(active&&active.id===data.other_id){refreshMessages();}
+    } else if(data.type==='typing'){
+      if(active&&active.id===data.from)showPartnerTyping();
+    }
+  };
+  ws.onclose=()=>{console.log('[Orbit] WS closed');ws=null;scheduleReconnect();};
+  ws.onerror=()=>{try{ws.close();}catch{}};
+}
+function scheduleReconnect(){
+  if(!me)return;
+  wsRetry=Math.min(wsRetry+1,10);
+  setTimeout(connectWS, 800*wsRetry);
+}
+
+// ---------- Notifications ----------
+let notificationSnapshot=null;
+async function enableOrbitNotifications(){
+  if(!('Notification' in window)){alert('Уведомления браузера не поддерживаются');return;}
+  const p=await Notification.requestPermission();
+  alert(p==='granted'?'Уведомления включены':'Разрешение на уведомления не выдано');
+}
+async function pollOrbitNotifications(){
+  if(!me)return;
+  try{
+    const r=await fetch('/api/chats');if(!r.ok)return;
+    const j=await r.json(),chats=j.chats||[];
+    if(notificationSnapshot===null){notificationSnapshot=new Map(chats.map(c=>[c.id,c.last_time]));return;}
+    for(const c of chats){
+      const previous=notificationSnapshot.get(c.id);
+      if(previous!==undefined&&c.last_time&&c.last_time>previous&&'Notification' in window&&Notification.permission==='granted'){
+        if(!active||active.id!==c.id){
+          const n=new Notification('Новое сообщение от '+c.display_name,{body:c.last_message||'Новое сообщение в Orbit',tag:'orbit-'+c.id});
+          n.onclick=()=>{window.focus();openChat(c);n.close();};
+        }
+      }
+      notificationSnapshot.set(c.id,c.last_time);
+    }
+  }catch(e){}
+}
+
+// ---------- Profiles ----------
 function addProfile(){
-  // Preserve the current profile, then show sign-in for the additional account.
   if(me){
     const token=localStorage.getItem('orbit_active_token');
     if(token){
@@ -237,7 +553,7 @@ function renderSavedProfiles(){
 }
 function saveProfileLocally(){if(!me)return;const token=localStorage.getItem('orbit_active_token');if(!token){document.getElementById('settingsNotice').textContent='Сессия не найдена. Войдите заново.';return;}let list=savedProfiles();const profile={username:me.username,display_name:me.display_name,token};const idx=list.findIndex(p=>p.username===me.username);if(idx>=0)list[idx]=profile;else list.push(profile);localStorage.setItem('orbit_profiles',JSON.stringify(list));renderSavedProfiles();document.getElementById('settingsNotice').textContent='Профиль сохранён на этом устройстве';}
 function switchProfile(profile){
-  if(!profile || !profile.token){
+  if(!profile||!profile.token){
     document.getElementById('settingsNotice').textContent='Для этого профиля нужно один раз войти заново.';
     return;
   }
@@ -246,33 +562,11 @@ function switchProfile(profile){
 }
 async function logout(){const token=localStorage.getItem('orbit_active_token');await fetch('/api/logout',{method:'POST'});localStorage.removeItem('orbit_active_token');localStorage.setItem('orbit_profiles',JSON.stringify(savedProfiles().filter(p=>p.token!==token)));location.reload();}
 async function uploadAvatar(){let f=document.getElementById('avatarFile').files[0];if(!f){document.getElementById('settingsNotice').textContent='Выберите изображение';return;}let fd=new FormData();fd.append('file',f);let r=await fetch('/api/avatar',{method:'POST',body:fd});let j=await r.json();if(!r.ok){document.getElementById('settingsNotice').textContent=j.detail||'Ошибка загрузки';return;}me.avatar=j.url;document.getElementById('settingsAvatar').src=j.url;document.getElementById('myAvatar').src=j.url;document.getElementById('settingsNotice').textContent='Аватар обновлён';}
-async function uploadAttachment(file){let fd=new FormData();fd.append('file',file);let r=await fetch('/api/upload',{method:'POST',body:fd});let j=await r.json();if(!r.ok)throw new Error(j.detail||'Ошибка загрузки файла');return j.attachment;}
-function addAttachmentPreview(parent,a){if(!a)return;let url=a.url;if((a.type||'').startsWith('image/')){let img=document.createElement('img');img.src=url;img.alt=a.name;img.className='attachment';img.loading='lazy';parent.appendChild(img);}else if((a.type||'').startsWith('video/')){let v=document.createElement('video');v.src=url;v.controls=true;v.className='attachment';parent.appendChild(v);}else if((a.type||'').startsWith('audio/')){let au=document.createElement('audio');au.src=url;au.controls=true;au.className='attachment';parent.appendChild(au);}else{let link=document.createElement('a');link.href=url;link.textContent='📎 '+(a.name||'Файл');link.className='file-chip';link.target='_blank';parent.appendChild(link);}}
 
-let notificationSnapshot=null;
-async function enableOrbitNotifications(){
-  if(!('Notification' in window)){alert('Уведомления браузера не поддерживаются');return;}
-  const p=await Notification.requestPermission();
-  alert(p==='granted'?'Уведомления включены':'Разрешение на уведомления не выдано');
-}
-async function pollOrbitNotifications(){
-  if(!me)return;
-  try{
-    const r=await fetch('/api/chats');if(!r.ok)return;
-    const j=await r.json(),chats=j.chats||[];
-    if(notificationSnapshot===null){notificationSnapshot=new Map(chats.map(c=>[c.id,c.last_time]));return;}
-    for(const c of chats){
-      const previous=notificationSnapshot.get(c.id);
-      if(previous!==undefined && c.last_time && c.last_time>previous && 'Notification' in window && Notification.permission==='granted'){
-        if(!active || active.id!==c.id){
-          const n=new Notification('Новое сообщение от '+c.display_name,{body:c.last_message||'Новое сообщение в Orbit',tag:'orbit-'+c.id});
-          n.onclick=()=>{window.focus();openChat(c);n.close();};
-        }
-      }
-      notificationSnapshot.set(c.id,c.last_time);
-    }
-  }catch(e){}
-}
-loadMe();setInterval(refreshMessages,4000);setInterval(loadChats,8000);
+// ---------- Boot ----------
+loadMe();
+// Lightweight fallback polling: websocket handles real-time, these only catch edge cases.
+setInterval(loadChats,15000);
+setInterval(refreshMessages,15000);
 setInterval(pollOrbitNotifications,8000);
 </script></body></html>
